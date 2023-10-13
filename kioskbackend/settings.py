@@ -34,7 +34,7 @@ else:
     DEBUG = debug_env in "ja on yes tryue".split()
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split()
 
 
 CACHES = {
