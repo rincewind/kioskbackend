@@ -15,6 +15,7 @@ django = "*"
 google-apis-oauth-django = "*"
 django-allauth = "*"
 pillow = "*"
+whitenoise = "*"
 
 [dev-packages]
 
