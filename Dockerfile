@@ -8,9 +8,9 @@ RUN apt-get update && \
     pip3 install pipenv
 
 
-RUN mkdir /data
-RUN mkdir /media
-RUN mkdir /static
+RUN mkdir -p /data
+RUN mkdir -p  /media
+RUN mkdir -p  /static
 
 
 RUN mkdir -p /usr/src/app
