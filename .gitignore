@@ -9,3 +9,6 @@ media_root
 /.idea/modules.xml
 /.idea/tauziehen.iml
 /.idea/vcs.xml
+.idea
+
+/.env

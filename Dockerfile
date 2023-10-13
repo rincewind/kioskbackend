@@ -1,9 +1,5 @@
 FROM python:3.11
 
-VOLUME /media
-VOLUME /static
-VOLUME /data
-
 RUN apt-get clean
 
 RUN apt-get update && \
