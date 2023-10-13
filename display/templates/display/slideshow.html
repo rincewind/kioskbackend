@@ -74,7 +74,7 @@
                     <div class="r-fit-text">{{ special_event.start|timeuntil }}</div>
                     <div>bis</div>
                     <div class="r-fit-text {% if special_event.jugend %}hv{% endif %}">{{ special_event.summary }}</div>
-                    <div>{{ special_event.start|date:"l, d. F"}}{% if not special_event.allday %} um {{special_event.start|time:"H:t"}} Uhr{% endif %}</div>
+                    <div>{{ special_event.start|date:"l, d. F"}}{% if not special_event.allday %} um {{special_event.start|time:"H:i"}} Uhr{% endif %}</div>
 
                 </section>
             {% endif %}

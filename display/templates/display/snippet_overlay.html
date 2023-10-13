@@ -9,7 +9,7 @@
 
     {% if next_event %}
         <div>
-        <strong>Ab {{ next_event.start|date:"H:t"}}:</strong><br/><span class="{% if next_event.jugend %}hv{% endif %}">{{ next_event.summary }}</span>
+        <strong>Ab {{ next_event.start|date:"H:i"}}:</strong><br/><span class="{% if next_event.jugend %}hv{% endif %}">{{ next_event.summary }}</span>
         </div>
     {% endif %}
 </div>
