@@ -155,7 +155,7 @@ STATIC_URL = "static/"
 
 MEDIA_URL = "media/"
 
-STATIC_ROOT = os.environ.get("STATIC_ROOT")
+STATIC_ROOT = os.environ.get("STATIC_ROOT", BASE_DIR / "static_root")
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", BASE_DIR / "media_root")
 
 # Default primary key field type
@@ -185,3 +185,18 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SOCIALACCOUNT_STORE_TOKENS = True
+
+EMAIL_HOST = os.environ.get("SMTP_HOST")
+EMAIL_PORT = int(os.environ.get("SMTP_PORT", "465"))
+EMAIL_HOST_USER = os.environ.get("SMTP_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("SMTP_PASSWORD")
+
+EMAIL_USE_SSL = True
+ADMINS = [("Peter Quade", "pq@pqua.de")]
+DEFAULT_FROM_EMAIL = "kioskbackend@wolke.ruhr"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
