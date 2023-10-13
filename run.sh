@@ -6,6 +6,8 @@ PIPENV_VENV_IN_PROJECT=1
 
 pipenv run python manage.py collectstatic --noinput
 
+pipenv run python manage.py createcachetable
+
 # Danger wil robinson.
 pipenv run python manage.py migrate --noinput
 
