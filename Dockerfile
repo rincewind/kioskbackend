@@ -7,7 +7,12 @@ RUN apt-get update && \
     pip3 install uwsgi && \
     pip3 install pipenv
 
-    
+
+RUN mkdir /data
+RUN mkdir /media
+RUN mkdir /static
+
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
