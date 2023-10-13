@@ -1,0 +1,118 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="{% static 'reset.css' %}">
+		<link rel="stylesheet" href="{% static 'reveal.css' %}">
+		<link rel="stylesheet" href="{%  static 'black.css' %}">
+		<link rel="stylesheet" href="{%  static 'fonts/handvetica/font.css' %}">
+
+        <style>
+            #gemeindehaus .tabelle td, .tabelle tr {
+                border: none;
+            }
+            #gemeindehaus .tabelle .odd {
+                background-color: #000056;
+            }
+            .eventlist h4 {
+                text-transform: none;
+            }
+            .eventlist__table {
+                font-size: 1.5rem;
+            }
+            .eventlist table .eventlist__group {
+                padding-top: 2rem;
+                color: lightblue;
+            }
+            .eventlist table .eventlist__row {
+                border-bottom: none;
+             }
+            .eventlist table td {
+                border-bottom: none;
+            }
+            .eventlist table .eventlist__time {
+                color: orange;
+                font-size: 1.75rem;
+            }
+            .eventlist table  .eventlist__summary {
+                font-size: 1.75rem;
+            }
+            .hv {
+                font-family: HandVetica;
+            }
+        </style>
+
+		<!-- Theme used for syntax highlighted code -->
+	</head>
+	<body>
+		<div class="reveal" id="gemeindehaus">
+			<div class="slides">
+                {% for slide in slides %}
+                    <section data-auto-animate data-background-size="contain" data-background-image="{{ slide.image.url }}">
+                    {% include "display/snippet_overlay.html" with next_event=next_event current_event=current_event %}
+                    </section>
+                {% endfor %}
+
+
+                {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute" %}
+
+                {% include "display/snippet_eventlistslide.html" with events=next_events title="Die nächsten Veranstaltungen" %}
+                {% include "display/snippet_eventlistslide.html" with events=preview_events title="Ausblick" %}
+
+
+
+            {% if special_event %}
+                <section data-transition="slide" data-auto-animate data-background-size="contain" data-background-image="FIXME nices hintergrundbild fuer diese Kalenderslides?">
+
+                    <div>Noch </div>
+                    <div class="r-fit-text">{{ special_event.start|timeuntil }}</div>
+                    <div>bis</div>
+                    <div class="r-fit-text {% if special_event.jugend %}hv{% endif %}">{{ special_event.summary }}</div>
+                    <div>{{ special_event.start|date:"l, d. F"}}{% if not special_event.allday %} um {{special_event.start|time:"H:t"}} Uhr{% endif %}</div>
+
+                </section>
+            {% endif %}
+
+                <!-- section data-auto-animate data-background-size="contain" data-background-image="FIXME nices hintergrundbild fuer diese Kalenderslides?">
+                    <h4 style="text-transform: none">Diese Woche im Dorfgemeinschaftshaus</h4>
+                    <table class="tabelle">
+                        <tr class="odd"><td>Montag</td><td>14 Uhr</td><td>Waffelei</td></tr>
+                        <tr><td>Dienstag</td><td>18 Uhr</td><td>Spirit</td></tr>
+                        <tr class="odd"><td>Freitag</td><td>20 Uhr</td><td>Fritten essen</td></tr>
+                        <tr class="odd"><td></td><td>23 Uhr</td><td>Knutschen</td></tr>
+                    </table>
+                </section -->
+
+            <!--
+				<section  data-auto-animate data-background-size="contain"  data-background-image="img/fly2.jpg"><div data-id="thing" class="" style="background-color: rgba(0,0,0,0.7)">Slide 1</div></section>
+				<section  data-background-size="contain"  data-background-image="img/fly3.jpg">Slide 3</section>
+				<section  data-background-size="contain"  data-background-image="img/fly4.jpg">Slide 4</section>
+				 -->
+
+			</div>
+		</div>
+
+		<script src="{% static 'reveal.js' %}"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+				controls: false,
+				loop: true,
+				autoSlide: 7000,
+				progress: false,
+				autoSlideStoppable: true,
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [  ]
+			});
+		</script>
+	</body>
+</html>

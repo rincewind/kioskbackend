@@ -1,0 +1,19 @@
+{% if next_event or current_event %}
+<div class="r-stretch" style="position: relative;">
+<div data-id="hinweis"  class="" style="background-color: rgba(0,0,0,0.7); position: absolute; left: 0; right: 0; bottom: 0;">
+    {% if current_event %}
+        <div>
+        <strong>Jetzt:</strong><br/><span class="{% if current_event.jugend %}hv{% endif %}">{{ current_event.summary }}</span>
+        </div>
+    {% endif %}
+
+    {% if next_event %}
+        <div>
+        <strong>Ab {{ next_event.start|date:"H:t"}}:</strong><br/><span class="{% if next_event.jugend %}hv{% endif %}">{{ next_event.summary }}</span>
+        </div>
+    {% endif %}
+</div>
+</div>
+{% endif %}
+
+

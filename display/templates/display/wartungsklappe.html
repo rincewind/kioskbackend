@@ -1,0 +1,86 @@
+{% load static %}
+<!doctype html>
+
+<html>
+<head>
+    <title>Wartungsklappe!</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="{% static 'dropzone.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'dropzone.min.css' %}">
+    <link rel="stylesheet" href="{% static 'tachyons.min.css' %}">
+</head>
+<body>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if request.user.is_staff %}
+
+<h1>Unter der Haube des mächtigen Info-Displays im Dorfgemeinschaftshaus!</h1>
+
+<h3>Banner bearbeiten:</h3>
+    <ul>
+    {% for b in banner %}
+        <li><a href="{% url "banneredit" b.pk %}">{{ b.title }}</a></li>
+    {% endfor %}
+    </ul>
+
+<h3>Neue Banner hochladen:</h3>
+<div>Maximal 5 MB je Bild bitte.</div>
+<form action="{% url "wartungsklappe" %}" method="post" enctype="multipart/form-data" class="dropzone" id="banner">
+    {% csrf_token %}
+    <!-- input type="submit" value="Verbannern" -->
+</form>
+
+<script>
+  Dropzone.options.banner = { // camelized version of the `id`
+    paramName: "file", // The name that will be used to transfer the file
+    maxFilesize: 5, // MB
+      acceptedFiles: 'image/*',
+      capture: "camera"
+  };
+</script>
+{% if new_calendars %}
+<h3>Kalender verknüpfen:</h3>
+<form action="{% url 'wartungsklappe' %}" method="post">
+{% csrf_token %}
+<ul>
+    {% for cid, summary in new_calendars %}
+        <li><label><input type="radio" value="{{ cid }}" name="connect_calendar">{{ summary }}</label></li>
+    {% endfor %}
+</ul>
+<input type="submit" value="Kalender verknüpfen" name="connect">
+</form>
+{% endif %}
+{% if connected_calendars %}
+<h3>Verknüpfung aufheben:</h3>
+<form action="{% url 'wartungsklappe' %}" method="post">
+{% csrf_token %}
+
+<ul>
+    {% for cid, cal in connected_calendars %}
+        <li><label><input type="radio" value="{{ cid }}" name="disconnect_calendar"> {{ cal.summary }} [{{ cal.user }}]</label></li>
+    {% endfor %}
+</ul>
+<input type="submit" value="Verknüpfung aufheben" name="disconnect">
+</form>
+{% endif %}
+{% else %}
+    <p>Nee. Du bist leider (noch?) nicht würdig. Melde Dich bei einer Aufsichtsperson, dass diese sich doch bitte an Peter wenden soll mit der Bitte</p>
+    <h1>{{ request.user }}</h1>
+    <p>zu benedeien.</p>
+{% endif %}
+<h3>Cache löschen:</h3>
+<form method="post">
+    {% csrf_token %}
+    <input type="submit" value="Nuke! 💥" name="nuke">
+</form>
+</body>
+</html>
+

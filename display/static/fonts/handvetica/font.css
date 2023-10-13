@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'HandVetica';
+  src: url('HandVetica.eot'); /* IE9 Compat Modes */
+  src: url('HandVetica.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('HandVetica.woff') format('woff'), /* Modern Browsers */
+       url('HandVetica.ttf')  format('truetype'), /* Safari, Android, iOS */
+       url('HandVetica.svg#d7b3bde610cba6901bfe4dd464b59dd2') format('svg'); /* Legacy iOS */
+       
+  font-style:   normal;
+  font-weight:  700;
+}
+

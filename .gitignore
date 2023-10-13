@@ -1,0 +1,11 @@
+.venv/
+/db.sqlite3
+media_root
+
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/tauziehen.iml
+/.idea/vcs.xml
