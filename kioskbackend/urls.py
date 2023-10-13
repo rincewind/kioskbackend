@@ -31,5 +31,5 @@ urlpatterns = [
     path("wartungsklappe/banner/<int:pk>", banner_edit, name="banneredit"),
     # DANGER Wil Robinson. This is not recommended. Don't do this unless you know why you should'nt.
     # use whitenoise also for media. in this case it's fine
-    # re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
+] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
