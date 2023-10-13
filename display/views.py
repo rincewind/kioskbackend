@@ -38,7 +38,16 @@ def show_presentation(request):
 
     if not all_slides:
         pass  # FIXME: do something. misconfigured. show leekspin or something.
-    nice_events = []
+
+    today_events = []  # was geht heute so? (Auch Vergangenes)
+    next_event = None  # nächstes Ereignis das in der nächsten Stunde startet.
+    current_event = (
+        None  # letztes Ereignis, wenn es  in der letzten Stunde startete.
+    )
+    next_events = []  # die nächsten fünf Events
+    preview_events = []  # speziell markierte vorschau events
+    special_event = None
+
     for cal in CalendarConnection.objects.all():
         try:
             token = SocialToken.objects.get(
@@ -85,14 +94,6 @@ def show_presentation(request):
 
         Event = collections.namedtuple("Event", "start summary allday jugend")
 
-        today_events = []  # was geht heute so? (Auch Vergangenes)
-        next_event = None  # nächstes Ereignis das in der nächsten Stunde startet.
-        current_event = (
-            None  # letztes Ereignis, wenn es  in der letzten Stunde startete.
-        )
-        next_events = []  # die nächsten fünf Events
-        preview_events = []  # speziell markierte vorschau events
-        special_event = None
         start_of_day = n.replace(hour=0, minute=0, second=0)
         end_of_day = n.replace(hour=23, minute=59, second=59)
 
