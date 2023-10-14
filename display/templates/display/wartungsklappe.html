@@ -1,38 +1,17 @@
-{% load static %}
-<!doctype html>
+{% extends "display/base.html" %}
 
-<html>
-<head>
-    <title>Wartungsklappe!</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="{% static 'dropzone.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'dropzone.min.css' %}">
-    <link rel="stylesheet" href="{% static 'tachyons.min.css' %}">
-</head>
-<body>
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+{% load static %}
+{% block content %}
+
+{% load thumbnail %}
 
 {% if request.user.is_staff %}
 
-<h1>Unter der Haube des mächtigen Info-Displays im Dorfgemeinschaftshaus!</h1>
+<h1 class="f1 lh-title">Unter der Haube des mächtigen Info-Displays im Dorfgemeinschaftshaus!</h1>
 
-<h3>Banner bearbeiten:</h3>
-    <ul>
-    {% for b in banner %}
-        <li><a href="{% url "banneredit" b.pk %}">{{ b.title }}</a></li>
-    {% endfor %}
-    </ul>
 
-<h3>Neue Banner hochladen:</h3>
-<div>Maximal 5 MB je Bild bitte.</div>
+    <h3 class="f3 lh-copy">Neue Banner hochladen:</h3>
+<div class="">Maximal 5 MB je Bild bitte. Einfach hier abwerfen reicht. Profis bearbeiten nachher noch die Details.</div>
 <form action="{% url "wartungsklappe" %}" method="post" enctype="multipart/form-data" class="dropzone" id="banner">
     {% csrf_token %}
     <!-- input type="submit" value="Verbannern" -->
@@ -46,41 +25,77 @@
       capture: "camera"
   };
 </script>
+
+<h3 class="f3 lh-copy">Banner bearbeiten:</h3>
+    <ul class="list pa0">
+    {% for b in banner %}
+        {% thumbnail b.image "100x100" crop="center" as im %}
+        <li>
+            <a class="link dt w-100 bb b--black-05 pb2 mt2" href="{% url "banneredit" b.pk %}">
+                    <div class="dtc w2 w3-ns v-mid">
+                                    <img src="{{ im.url }}" alt="{{  b.title}}">
+                    </div>
+                    <div class="dtc v-mid pl3">
+                        {{ b.title }}
+                    </div>
+            </a></li>
+        {% endthumbnail %}
+    {% endfor %}
+    </ul>
+
+
 {% if new_calendars %}
-<h3>Kalender verknüpfen:</h3>
+<h3 class="f3 lh-copy">Kalender verknüpfen:</h3>
 <form action="{% url 'wartungsklappe' %}" method="post">
 {% csrf_token %}
-<ul>
+<ul class="list pa0">
     {% for cid, summary in new_calendars %}
-        <li><label><input type="radio" value="{{ cid }}" name="connect_calendar">{{ summary }}</label></li>
+        <li class="flex items-center mb2"><input class="mr2" type="radio" value="{{ cid }}" id="new_{{ cid }}" name="connect_calendar"><label class="lh-copy" for="new_{{ cid }}">{{ summary }}</label></li>
     {% endfor %}
 </ul>
 <input type="submit" value="Kalender verknüpfen" name="connect">
 </form>
 {% endif %}
 {% if connected_calendars %}
-<h3>Verknüpfung aufheben:</h3>
+<h3 class="f3 lh-copy">Verknüpfung aufheben:</h3>
 <form action="{% url 'wartungsklappe' %}" method="post">
 {% csrf_token %}
 
-<ul>
+<ul class="list pa0">
     {% for cid, cal in connected_calendars %}
-        <li><label><input type="radio" value="{{ cid }}" name="disconnect_calendar"> {{ cal.summary }} [{{ cal.user }}]</label></li>
+        <li class="flex items-center mb2"><input  class="mr2" type="radio" value="{{ cid }}" id="connected_{{ cid }}" name="disconnect_calendar"><label for="connected_{{ cid }}" class="lh-copy">{{ cal.summary }} [{{ cal.user }}]</label></li>
     {% endfor %}
 </ul>
 <input type="submit" value="Verknüpfung aufheben" name="disconnect">
 </form>
 {% endif %}
 {% else %}
-    <p>Nee. Du bist leider (noch?) nicht würdig. Melde Dich bei einer Aufsichtsperson, dass diese sich doch bitte an Peter wenden soll mit der Bitte</p>
+    <p class="lh-copy">Nee. Du bist leider (noch?) nicht würdig. Melde Dich bei einer Aufsichtsperson, dass diese sich doch bitte an Peter wenden soll mit der Bitte</p>
     <h1>{{ request.user }}</h1>
     <p>zu benedeien.</p>
 {% endif %}
-<h3>Cache löschen:</h3>
+<h3 class="f3 lh-copy">Cache löschen:</h3>
 <form method="post">
     {% csrf_token %}
     <input type="submit" value="Nuke! 💥" name="nuke">
 </form>
-</body>
-</html>
+    <p class="lh-copy">
+    Änderungen werden erst nach gewisser Zeit sichtbar. Mit diesem Knopf, werden Änderungen schneller übernommen. Beim echten Display dauert es trotzdem ein paar Minuten, bis es sich ändert.
+    </p>
 
+<h3 class="f3 lh-copy ">Erklärungen:</h3>
+    <div class="bg-black-10 pa2">
+    <p class="lh-copy">
+        Alle angeknüpften Kalender sind gleichberechtigt. Alle Kalender-Ereignisse werden zusammengemischt.
+    </p>
+    <p class="lh-copy">
+        Kalender-Ereignisse mit ⏰ werden bei "Ausblick" angezeigt. Für besonders wichtige Großereignisse, die schon lange im Voraus angekündigt werden sollen.
+    </p>
+    <p class="lh-copy">
+        Kalender-Ereignisse mit 🚸 sind Ereignisse der Jugend. Derzeit ändert das nur die Schriftart.
+    </p>
+    <p class="lh-copy">
+        Das nächste Kalender-Ereigniss mit 🎉 ist ein ganz ganz ganz besonderes Ereigniss, für welches der "Noch...bis" Bildschirm angezeigt wird.
+    </p>
+    </div>
+{% endblock %}

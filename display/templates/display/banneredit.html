@@ -1,9 +1,27 @@
+{% extends "display/base.html" %}
+{% block content %}
 
+    <style>
+    .banneredit > div {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+    .banneredit label {
+        display: block;
+        font-weight: bold;
+    }
+    .banneredit input {
+        width: 30rem;
+    }
+    </style>
 
-<form method="post">
-    {{ form.as_ul }}
+<form method="post" class="mb3 banneredit">
+
+    {{ form.as_div }}
     <input type="submit" value="Speichern">
     {% csrf_token %}
 </form>
 
-<a href="{% url 'wartungsklappe' %}">Zurück</a>
+<a href="{% url 'wartungsklappe' %}" class="link hover-light-blue">Zurück</a>
+
+{% endblock %}

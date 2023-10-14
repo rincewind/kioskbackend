@@ -16,6 +16,7 @@ google-apis-oauth-django = "*"
 django-allauth = "*"
 pillow = "*"
 whitenoise = "*"
+sorl-thumbnail = "*"
 
 [dev-packages]
 

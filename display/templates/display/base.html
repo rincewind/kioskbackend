@@ -1,0 +1,51 @@
+{% load static %}
+<!doctype html>
+
+<html>
+<head>
+    <title>{% block title %}📺 Display{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="{% static 'dropzone.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'dropzone.min.css' %}">
+    <link rel="stylesheet" href="{% static 'tachyons.min.css' %}">
+    <style>
+        .debug {
+            background-color:  #ffa3d7;
+        }
+        .info {
+            background-color: #cdecff;
+        }
+        .success {
+            background-color:  #9eebcf;
+
+
+        }
+        .warning {
+            background-color:  #fbf1a9;
+
+        }
+        .error {
+            background-color: #ff725c;
+
+        }
+    </style>
+</head>
+<body>
+<main class="mw8 center system-sans-serif ma3 pa3">
+{% block messages %}
+{% if messages %}
+    <ul class="list w-100 pa0 ">
+        {% for message in messages %}
+        <li class="w-100 pa3 {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% endblock %}
+    {% block content %}
+
+    {% endblock %}
+</main>
+</body>

@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    'sorl.thumbnail',
     "display",
 ]
 
