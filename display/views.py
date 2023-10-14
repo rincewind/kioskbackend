@@ -206,7 +206,7 @@ def wartungsklappe(request):
         try:
             things = service.calendarList().list().execute()
         except RefreshError:
-            things = []
+            things = dict(items=[])
 
     # Call the Calendar API
     # now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
