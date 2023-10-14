@@ -1,16 +1,16 @@
 {% if events %}
-<section class="eventlist" data-auto-animate data-background-size="contain" data-background-image="FIXME nices hintergrundbild fuer diese Kalenderslides?">
-    <h4 class="eventlist__title">{{ title}}</h4>
-    <table class="eventlist__table">
+<div class="eventlist {{ extra_class }}">
+    <h4 class="eventlist__title" style="padding-left: 0.5em;">{{ title}}</h4>
+    <table class="eventlist__table" data-id="table-{{ title }}">
     {% regroup events by start.day as events_by_day %}
     {%  for day, groupevents in events_by_day %}
         <tr class="eventlist__row eventlist__row--group"><td class="eventlist__group" colspan="2">{{ groupevents.0.start|date:"l, d. F" }}</td></tr>
         {% for event in groupevents %}
-        <tr class="eventlist__row"><td class="eventlist__time">{{ event.start|date:"H:i" }}</td>
+        <tr class="eventlist__row {% if event == marker_event %}eventlist__row--marked{% endif %}"><td class="eventlist__time">{{ event.start|date:"H:i" }}</td>
         <td class="eventlist__summary {% if event.jugend %}hv{% endif %}">{{ event.summary }}</td>
         </tr>
         {% endfor %}
     {% endfor %}
     </table>
-</section>
+</div>
 {% endif %}

@@ -156,18 +156,20 @@ def show_presentation(request):
             if is_sepecial_event and not special_event:
                 special_event = data
 
+    slides = [("banner", x) for x in all_slides]
+    slides.append(("kalender", ("Die nächsten Veranstaltungen", next_events)))
+    slides.append(("kalender", ("Ausblick", preview_events)))
+    slides.append(("countdown", special_event))
+
+
     response = render(
         request,
         "display/slideshow.html",
         context=dict(
-            slides=all_slides,
-            next="14 Uhr: Bananenbrotbacken",
-            next_events=next_events,
+            slides=slides,
             today_events=today_events,
-            next_event=next_event,
             special_event=special_event,
-            current_event=current_event,
-            preview_events=preview_events,
+            marker_event=current_event or next_event,
         ),
     )
 

@@ -23,11 +23,11 @@
             .eventlist h4 {
                 text-transform: none;
             }
-            .eventlist__table {
-                font-size: 1.5rem;
+            .eventlist .eventlist__table {
+                margin: 0;
             }
             .eventlist table .eventlist__group {
-                padding-top: 2rem;
+                padding-top: 0.5em;
                 color: lightblue;
             }
             .eventlist table .eventlist__row {
@@ -38,13 +38,25 @@
             }
             .eventlist table .eventlist__time {
                 color: orange;
-                font-size: 1.75rem;
             }
             .eventlist table  .eventlist__summary {
-                font-size: 1.75rem;
+            }
+            .eventlist .eventlist__row--marked {
+                background: darkslateblue;
             }
             .hv {
                 font-family: HandVetica;
+            }
+            .eventlist .eventlist__title {
+                font-size: 1em;
+            }
+            .eventlist {
+                                font-size: 1.8rem;
+
+            }
+
+            .eventlist.eventlist--large {
+                font-size: 2.5rem;
             }
         </style>
 
@@ -53,31 +65,50 @@
 	<body>
 		<div class="reveal" id="gemeindehaus">
 			<div class="slides">
+            {% comment %}
                 {% for slide in slides %}
                     <section data-auto-animate data-background-size="contain" data-background-image="{{ slide.image.url }}">
                     {% include "display/snippet_overlay.html" with next_event=next_event current_event=current_event %}
                     </section>
                 {% endfor %}
+                {% endcomment %}
+
+                {% for slidetype, slide in slides %}
+                    <section data-auto-animate style="text-align: left;">
+                    <div style="display:flex; align-items: center; justify-content: space-around; width: 100%;" class="r-stretch">
+                        {% if slidetype == "banner" %}
+                           <img src="{{ slide.image.url }}" alt="{{ slide.title }}" style="width: 56%; display: block;">
+                        {% elif slidetype == "kalender" %}
+                            <div style="width: 56%;">
+                                {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 %}
+                            </div>
+                        {% elif slidetype == "countdown" %}
+                            <div style="flex-grow: 1;width: 56%">
+                                                <div>Noch </div>
+                                            <div class="r-fit-text">{{ slide.start|timeuntil }}</div>
+                                            <div>bis</div>
+                                            <div class="r-fit-text"><span class="{% if slide.jugend %}hv{% endif %}">{{ slide.summary }}</span></div>
+                                            <div>{{ slide.start|date:"l, d. F"}}{% if not slide.allday %} um {{slide.start|time:"H:i"}} Uhr{% endif %}</div>
+                            </div>
+                        {% endif %}
+                        <div style="margin-left: 5%; width: 39%;" >
+                            <div data-id="today-events">
+                            {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  extra_class="eventlist--large" marker_event=marker_event%}
+                            </div>
+                        </div>
+                    </div>
+                    </section>
+                {% endfor %}
 
 
+                {%  comment %}
                 {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute" %}
 
                 {% include "display/snippet_eventlistslide.html" with events=next_events title="Die nächsten Veranstaltungen" %}
                 {% include "display/snippet_eventlistslide.html" with events=preview_events title="Ausblick" %}
+                {%  endcomment %}
 
 
-
-            {% if special_event %}
-                <section data-transition="slide" data-auto-animate data-background-size="contain" data-background-image="FIXME nices hintergrundbild fuer diese Kalenderslides?">
-
-                    <div>Noch </div>
-                    <div class="r-fit-text">{{ special_event.start|timeuntil }}</div>
-                    <div>bis</div>
-                    <div class="r-fit-text"><span class="{% if special_event.jugend %}hv{% endif %}">{{ special_event.summary }}</span></div>
-                    <div>{{ special_event.start|date:"l, d. F"}}{% if not special_event.allday %} um {{special_event.start|time:"H:i"}} Uhr{% endif %}</div>
-
-                </section>
-            {% endif %}
 
                 <!-- section data-auto-animate data-background-size="contain" data-background-image="FIXME nices hintergrundbild fuer diese Kalenderslides?">
                     <h4 style="text-transform: none">Diese Woche im Dorfgemeinschaftshaus</h4>
@@ -109,7 +140,10 @@
 				loop: true,
 				autoSlide: 7000,
 				progress: false,
-				autoSlideStoppable: false,
+				autoSlideStoppable: true,
+                width: 1600,
+                height: 900,
+
 				// Learn about plugins: https://revealjs.com/plugins/
 				plugins: [  ]
 			});
