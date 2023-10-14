@@ -14,6 +14,7 @@ from django.utils.timezone import now, make_aware, is_aware
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from google.auth.exceptions import RefreshError
 
 from display.models import ImageSlide, CalendarConnection
@@ -31,6 +32,7 @@ def index(request):
     return render(request, "display/index.html")
 
 
+@xframe_options_sameorigin
 @cache_page(60 * 15)
 def show_presentation(request):
     n = now()
@@ -157,7 +159,6 @@ def show_presentation(request):
     )
 
     response.headers["Refresh"] = "300"
-    response.header["X-Frame-Options"] = "SAMEORIGIN"
 
     return response
 
