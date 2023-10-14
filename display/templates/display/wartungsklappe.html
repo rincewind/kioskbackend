@@ -69,11 +69,6 @@
 <input type="submit" value="Verknüpfung aufheben" name="disconnect">
 </form>
 {% endif %}
-{% else %}
-    <p class="lh-copy">Nee. Du bist leider (noch?) nicht würdig. Melde Dich bei einer Aufsichtsperson, dass diese sich doch bitte an Peter wenden soll mit der Bitte</p>
-    <h1>{{ request.user }}</h1>
-    <p>zu benedeien.</p>
-{% endif %}
 <h3 class="f3 lh-copy">Cache löschen:</h3>
 <form method="post">
     {% csrf_token %}
@@ -104,5 +99,13 @@
     <iframe src="{% url "slideshow" %}" style="aspect-ratio: 16/9; width: 90%;">
 
     </iframe>
+
+
+
+    {% else %}
+    <p class="lh-copy">Nee. Du bist leider (noch?) nicht würdig. Melde Dich bei einer Aufsichtsperson, dass diese sich doch bitte an Peter wenden soll mit der Bitte
+    <span class="b f4">{{ request.user }}</span>
+    zu benedeien.</p>
+{% endif %}
 
 {% endblock %}

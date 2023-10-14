@@ -1,4 +1,5 @@
 import collections
+import logging
 from datetime import timedelta, datetime
 
 from allauth.socialaccount.models import SocialToken
@@ -27,6 +28,7 @@ from googleapiclient.errors import HttpError
 
 # Create your views here.
 
+logger = logging.getLogger(__name__)
 
 def index(request):
     return render(request, "display/index.html")
@@ -87,6 +89,7 @@ def show_presentation(request):
                 .execute()
             )
         except RefreshError:
+            logger.exception("Refresh woes in slideshow")
             continue
 
         events = events_result.get("items", [])
@@ -206,7 +209,8 @@ def wartungsklappe(request):
         service = build("calendar", "v3", credentials=credentials)
         try:
             things = service.calendarList().list().execute()
-        except RefreshError:
+        except RefreshError as e:
+            logger.exception("Refresh woes in wartungsklappe")
             things = dict(items=[])
 
     # Call the Calendar API

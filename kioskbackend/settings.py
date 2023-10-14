@@ -176,6 +176,7 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         "AUTH_PARAMS": {
             "access_type": "offline",
+            "prompt": "select_account+consent" # overkill or makes everything better?
         },
         "APP": {
             "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
