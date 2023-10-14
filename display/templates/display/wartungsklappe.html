@@ -36,8 +36,12 @@
                                     <img src="{{ im.url }}" alt="{{  b.title}}">
                     </div>
                     <div class="dtc v-mid pl3">
-                        {{ b.title }}
+                        {{ b.title }} {% if b.show_start >= now or b.show_end <= now %}[inaktiv]{% endif %}
+                        <div class="black-60">
+                            Sichtbar von {{ b.show_start|date:"d.m.Y H:i" }} bis {{ b.show_start|date:"d.m.Y H:i" }}.
+                        </div>
                     </div>
+
             </a></li>
         {% endthumbnail %}
     {% endfor %}
