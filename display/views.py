@@ -203,8 +203,10 @@ def wartungsklappe(request):
         )  # replace with yours
 
         service = build("calendar", "v3", credentials=credentials)
-
-        things = service.calendarList().list().execute()
+        try:
+            things = service.calendarList().list().execute()
+        except RefreshError:
+            things = []
 
     # Call the Calendar API
     # now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
