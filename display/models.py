@@ -9,11 +9,11 @@ from django.utils import timezone
 
 
 class ImageSlide(models.Model):
-    title = models.CharField(max_length=1024)
-    image = models.ImageField(upload_to="images/%Y/%m/%d/", blank=False)
+    title = models.CharField("Titel", max_length=1024)
+    image = models.ImageField("Bild", upload_to="images/%Y/%m/%d/", blank=False)
 
-    show_start = models.DateTimeField(default=timezone.now)
-    show_end = models.DateTimeField(default=datetime(3000, 1, 1, 9, 42))
+    show_start = models.DateTimeField("Erste Anzeige", default=timezone.now, help_text="Ab wann soll dieser Banner angezeigt werden? (tt.mm.jjjj hh:mm)")
+    show_end = models.DateTimeField("Letzte Anzeige", default=datetime(3000, 1, 1, 9, 42), help_text="Ab wann soll dieser Banner nicht mehr angezeigt werden? (tt.mm.jjjj hh:mm)")
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

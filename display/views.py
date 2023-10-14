@@ -179,7 +179,7 @@ def banner_edit(request, pk):
             form.save()
             return redirect("wartungsklappe")
 
-    return render(request, "display/banneredit.html", context=dict(form=form))
+    return render(request, "display/banneredit.html", context=dict(form=form, banner=banner))
 
 
 @login_required
