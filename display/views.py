@@ -70,7 +70,17 @@ def show_presentation(request):
                 client_secret=settings.SOCIALACCOUNT_PROVIDERS["google"]["APP"][
                     "secret"
                 ],
-            )  # replace with yours
+            )
+
+            if not credentials or not credentials.valid or credentials.expired and token.token_secret:
+                credentials.refresh()
+                token.token = credentials.token
+                if credentials.refresh_token and credentials.refresh_token != token.token_secret:
+                    token.token_secret = credentials.refresh_token
+
+                token.save()
+
+
 
             utcnow = datetime.utcnow()
             start_of_day = datetime(utcnow.year, utcnow.month, utcnow.day)
