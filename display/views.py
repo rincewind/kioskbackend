@@ -157,6 +157,8 @@ def show_presentation(request):
     )
 
     response.headers["Refresh"] = "300"
+    response.header["X-Frame-Options"] = "SAMEORIGIN"
+
     return response
 
 
