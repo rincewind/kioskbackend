@@ -80,7 +80,7 @@
                             <div style="width: 56%; display: block; text-align:center;">
                                 <img src="{{ slide.image.url }}" alt="{{ slide.title }}" >
                             </div>
-                        {% elif slidetype == "kalender" %}
+                        {% elif slidetype == "kalender"  %}
                             <div style="width: 56%; display: flex; align-items: center; justify-content: space-around">
                                 {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 %}
                             </div>
@@ -95,7 +95,11 @@
                         {% endif %}
                         <div style="margin-left: 5%; width: 39%;" >
                             <div data-id="today-events">
-                            {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  extra_class="eventlist--large" marker_event=marker_event%}
+                                {% if today_events %}
+                                {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  extra_class="eventlist--large" marker_event=marker_event%}
+                                {% else %}
+                                {% include "display/snippet_eventlistslide.html" with events=next_events title=""  extra_class="" marker_event=None%}
+                                {% endif %}
                             </div>
                         </div>
                     </div>
