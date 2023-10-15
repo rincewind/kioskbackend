@@ -77,7 +77,9 @@
                     <section data-auto-animate style="text-align: left;">
                     <div style="display:flex; align-items: center; justify-content: space-around; width: 100%;" class="r-stretch">
                         {% if slidetype == "banner" %}
-                           <img src="{{ slide.image.url }}" alt="{{ slide.title }}" style="width: 56%; display: block;">
+                            <div style="width: 56%; display: block; text-align:center;">
+                                <img src="{{ slide.image.url }}" alt="{{ slide.title }}" >
+                            </div>
                         {% elif slidetype == "kalender" %}
                             <div style="width: 56%; display: flex; align-items: center; justify-content: space-around">
                                 {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 %}
