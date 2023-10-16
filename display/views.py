@@ -1,5 +1,6 @@
 import collections
 import logging
+import re
 from datetime import timedelta, datetime
 
 from allauth.socialaccount.models import SocialToken
@@ -98,7 +99,8 @@ def massage_kalendereintrag(eintrag):
         if name.lower() in eintrag.lower():
             # we found a known room.
             room = alias
-            s = eintrag.replace(name, "").replace("@", "").strip()
+            s = re.sub('(?i)' + re.escape(name.lower()), "", eintrag)
+            s = s.replace("@", "").strip()
             if s[0] == ":":
                 s = s[1:]
 
