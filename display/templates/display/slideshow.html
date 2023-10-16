@@ -38,6 +38,7 @@
             }
             .eventlist table .eventlist__time {
                 color: orange;
+                vertical-align: middle;
             }
             .eventlist table  .eventlist__summary {
             }
@@ -57,6 +58,12 @@
 
             .eventlist.eventlist--large {
                 font-size: 2.5rem;
+            }
+            .eventlist__room {
+                display: block;
+                font-size: 0.9em;
+                font-style: italic;
+                color: rgba(255,255,255,0.7);
             }
         </style>
 
@@ -82,7 +89,7 @@
                             </div>
                         {% elif slidetype == "kalender"  %}
                             <div style="width: 56%; display: flex; align-items: center; justify-content: space-around">
-                                {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 %}
+                                {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 show_room=False %}
                             </div>
                         {% elif slidetype == "countdown" %}
                             <div style="flex-grow: 1;width: 56%">
@@ -96,7 +103,7 @@
                         <div style="margin-left: 5%; width: 39%;" >
                             <div data-id="today-events">
                                 {% if today_events %}
-                                {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  extra_class="eventlist--large" marker_event=marker_event%}
+                                {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  extra_class="eventlist--large" marker_event=marker_event show_room=True%}
                                 {% else %}
                                 {% include "display/snippet_eventlistslide.html" with events=next_events title=""  extra_class="" marker_event=None%}
                                 {% endif %}

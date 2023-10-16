@@ -37,8 +37,92 @@ def index(request):
 def massage_kalendereintrag(eintrag):
     """
     try and decipher the kalendereintrag. return "Summary", "Room"
+
+    Should be:
+
+    Room @ Event
+
+    But often it's not.
+
+    i.e.
+
+    @Sonnengruppenraum:Pekip -> "Pekip", "Sonnengruppenraum"
+
+    @Mukiraum: CKU Pilates 18-19Uhr -> "CKU Pilates 18-19Uhr", "Mukiraum"
+
+    1/3 Saal@KU
+    DienstgespÃ¤ch HAMA @ GemeindebÃ¼ro
+    2/3 Saal@Frauenhilfe
+    @1/3 Saal: Franz. Kurs
+    @Mukiraum: CKU Pilates 18-19Uhr
+    3/3 Saal @ WirbelsÃ¤ulengymnastik
+    KU@Saal
+    1/3 Saal@Bastelkreis
+    2/3 Saal@Seniorenkreis
+    JugendrÃ¤ume@FreakyFriday
+    MuKiraum @ TagesmÃ¼tter
+    1/3 Saal @ Dienstagsfrauen
+    1/3 Saal@ Jugend MAGK
+    9-12.15 h PEKiP / CKU SonnengrupRraum
+    3/3 Saal @ Gymnastik
+    2/3 Saal @ Posaunenchor
+    MuKiRaum @ PEKIP/ CKU
+    Yoga Kurs @ 1/3 Saal
+    MuKiRaum@RÃ¼ckbildungsgymnastik
+    Saal 1/3@Geburtsvorbereitungskurs
+    @Sonnengruppenraum:Pekip
+    1/3Saal @ Cafe Knirps
     """
-    pass
+    eintrag = eintrag.strip()
+
+    if len(eintrag) < 5:
+        # generate complaint?
+        return eintrag
+
+    known_rooms = {"1/3 Saal": "⅓ Saal",
+                   "1/3Saal": "⅓ Saal",
+                  "2/3 Saal": "⅔ Saal",
+                  "3/3 Saal": "Ganzer Saal",
+                  "MuKiRaum": "MuKi-Raum",
+                  "Sonnengruppenraum": "Sonnengruppenraum",
+                  "SonnengrupRraum": "Sonnengruppenraum",
+                  "Jugendräume": "Jugendräume",
+                  "Saal": "Ganzer Saal",
+                  "Gemeindebüro" : "Gemeindebüro",
+                  }
+
+    room = ""
+    summary = eintrag
+
+    for name, alias in known_rooms.items():
+        if name.lower() in eintrag.lower():
+            # we found a known room.
+            room = alias
+            s = eintrag.replace(name, "").replace("@", "").strip()
+            if s[0] == ":":
+                s = s[1:]
+
+            if s[-1] == ":":
+                s = s[:-1]
+
+            summary = s
+            break
+
+    if not room and "@" in eintrag:
+        if eintrag[0] == "@" and ":" in eintrag:
+            lhs, rhs = eintrag[1:].split(":")
+        else:
+            lhs, rhs = eintrag.split("@")
+
+        room = lhs.strip()
+        summary = rhs.strip()
+
+
+    if summary:
+        return summary, room
+    else: # FIXME: add complaints department?
+        return eintrag, ""
+
 
 
 import pprint
@@ -172,7 +256,7 @@ def show_presentation(request):
         if not events:
             continue
 
-        Event = collections.namedtuple("Event", "start summary allday jugend")
+        Event = collections.namedtuple("Event", "start summary allday jugend room")
 
         start_of_day = n.replace(hour=0, minute=0, second=0)
         end_of_day = n.replace(hour=23, minute=59, second=59)
@@ -183,17 +267,26 @@ def show_presentation(request):
             allday = not "dateTime" in event["start"]
             summary = event.get("summary", "")
 
+
             is_preview_event = "⏰" in summary
             is_sepecial_event = "🎉" in summary
             is_jugend = "🚸" in summary
 
             summary = summary.replace("⏰", "").replace("🎉", "").replace("🚸", "")
 
+            try:
+                summary, room = massage_kalendereintrag(summary)
+            except:
+                logger.exception("massage_kalendereintrag ist unglücklich")
+                room = ""
+
+            is_jugend = is_jugend or room == "Jugendräume" # temporary special case?!
+
             start = datetime.fromisoformat(start)
             if not is_aware(start):
                 start = make_aware(start, timezone.utc)
 
-            data = Event(start, summary, allday, is_jugend)
+            data = Event(start, summary, allday, is_jugend, room)
 
             if start_of_day <= start <= end_of_day:
                 today_events.append(data)
