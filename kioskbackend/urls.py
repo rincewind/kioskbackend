@@ -20,7 +20,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.views.static import serve
 
-from display.views import show_presentation, wartungsklappe, banner_edit, index
+from display.views import show_presentation, wartungsklappe, banner_edit, index, kalender_dump
 
 urlpatterns = [
     path("accounts/", include("allauth.urls")),
@@ -29,7 +29,8 @@ urlpatterns = [
     path("display/", show_presentation, name="slideshow"),
     path("wartungsklappe/", wartungsklappe, name="wartungsklappe"),
     path("wartungsklappe/banner/<int:pk>", banner_edit, name="banneredit"),
+    path("kalenderdump/", kalender_dump, name="kalenderdump"),
     # DANGER Wil Robinson. This is not recommended. Don't do this unless you know why you should'nt.
     # use whitenoise also for media. in this case it's fine
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

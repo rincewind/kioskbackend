@@ -34,6 +34,71 @@ def index(request):
     return render(request, "display/index.html")
 
 
+def massage_kalendereintrag(eintrag):
+    """
+    try and decipher the kalendereintrag. return "Summary", "Room"
+    """
+    pass
+
+
+import pprint
+
+@staff_member_required
+def kalender_dump(request):
+    data = ""
+
+    for cal in CalendarConnection.objects.all():
+        try:
+            token = SocialToken.objects.get(
+                account__user=cal.user, account__provider="google"
+            )
+        except SocialToken.DoesNotExist:
+            continue
+        try:
+            credentials = Credentials(
+                token=token.token,
+                refresh_token=token.token_secret,
+                token_uri="https://oauth2.googleapis.com/token",
+                client_id=settings.SOCIALACCOUNT_PROVIDERS["google"]["APP"][
+                    "client_id"
+                ],  # replace with yours
+                client_secret=settings.SOCIALACCOUNT_PROVIDERS["google"]["APP"][
+                    "secret"
+                ],
+            )
+
+            if not credentials or not credentials.valid or credentials.expired and token.token_secret:
+                credentials.refresh()
+                token.token = credentials.token
+                if credentials.refresh_token and credentials.refresh_token != token.token_secret:
+                    token.token_secret = credentials.refresh_token
+
+                token.save()
+
+            utcnow = datetime.utcnow()
+            start_of_day = datetime(utcnow.year, utcnow.month, utcnow.day)
+            googlenow = start_of_day.isoformat() + "Z"  # 'Z' indicates UTC time
+
+            service = build("calendar", "v3", credentials=credentials)
+            events_result = (
+                service.events()
+                .list(
+                    calendarId="primary" and cal.calendar_id,
+                    timeMin=googlenow,
+                    maxResults=50,
+                    singleEvents=True,
+                    orderBy="startTime",
+                )
+                .execute()
+            )
+        except RefreshError:
+            logger.exception("Refresh woes in slideshow")
+            continue
+
+        data += "\n\n" + pprint.pformat(events_result.get("items", []))
+
+    return HttpResponse(data, content_type="text/plain")
+
 @xframe_options_sameorigin
 @cache_page(60 * 15)
 def show_presentation(request):
