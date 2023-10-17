@@ -18,27 +18,39 @@
 </form>
 
 <script>
-  Dropzone.options.banner = { // camelized version of the `id`
-    paramName: "file", // The name that will be used to transfer the file
-    maxFilesize: 5, // MB
-      acceptedFiles: 'image/*',
-      capture: "camera"
-  };
+    Dropzone.autoDiscover = false;
+
+    up.compiler('#banner', (e) => {
+        console.log("hi!", e);
+
+        let dz = new Dropzone(e, {
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 5, // MB
+            acceptedFiles: 'image/*',
+            url: '{% url "wartungsklappe" %}'
+          // capture: false,
+      });
+        dz.on("complete", (file) => {
+            window.setTimeout(() => {
+                up.render({ target: '#bannerlist', url: '{% url 'wartungsklappe' %}' })
+            }, 100)
+        });
+    })
 </script>
 
 <h3 class="f3 lh-copy">Banner bearbeiten:</h3>
-    <ul class="list pa0">
+    <ul class="list pa0" id="bannerlist">
     {% for b in banner %}
         {% thumbnail b.image "100x100" crop="center" as im %}
         <li>
-            <a class="link dt w-100 bb b--black-05 pb2 mt2" href="{% url "banneredit" b.pk %}">
+            <a up-layer="new" up-accept-location="{% url 'wartungsklappe' %}" class="link dt w-100 bb b--black-05 pb2 mt2" href="{% url "banneredit" b.pk %}">
                     <div class="dtc w2 w3-ns v-mid">
                                     <img src="{{ im.url }}" alt="{{  b.title}}">
                     </div>
                     <div class="dtc v-mid pl3">
                         {{ b.title }} {% if b.show_start >= now or b.show_end <= now %}[inaktiv]{% endif %}
                         <div class="black-60">
-                            Sichtbar von {{ b.show_start|date:"d.m.Y H:i" }} bis {{ b.show_start|date:"d.m.Y H:i" }}.
+                            Sichtbar von {{ b.show_start|date:"d.m.Y H:i" }} bis {{ b.show_end|date:"d.m.Y H:i" }}.
                         </div>
                     </div>
 

@@ -11,7 +11,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import mail_admins
-from django.forms import ModelForm
+from django.forms import ModelForm, SplitDateTimeWidget, SplitDateTimeField, DateTimeInput, DateTimeField
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -402,10 +402,45 @@ def show_presentation(request):
     return response
 
 
+class DateTimeLocalInput(DateTimeInput):
+    input_type = "datetime-local"
+
+
+class DateTimeLocalField(DateTimeField):
+    # Set DATETIME_INPUT_FORMATS here because, if USE_L10N
+    # is True, the locale-dictated format will be applied
+    # instead of settings.DATETIME_INPUT_FORMATS.
+    # See also:
+    # https://developer.mozilla.org/en-US/docs/Web/HTML/Date_and_time_formats
+
+    input_formats = [
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M"
+    ]
+    widget = DateTimeLocalInput(format="%Y-%m-%dT%H:%M")
+
+
+
 class BannerForm(ModelForm):
     class Meta:
         model = ImageSlide
         fields = ["image", "show_start", "show_end", "title"]
+        field_classes = {
+            'show_start': DateTimeLocalField,
+            "show_end":DateTimeLocalField
+        }
+        Xwidgets = {
+            'show_start': SplitDateTimeWidget(
+                date_attrs={'type': 'date'},
+                time_attrs={'type': 'time'},
+            ),
+            'show_end': SplitDateTimeWidget(
+                date_attrs={'type': 'date'},
+                time_attrs={'type': 'time'},
+            )
+
+        }
 
 
 @staff_member_required
@@ -479,7 +514,7 @@ def wartungsklappe(request):
             messages.success(request, "Frisch durchgewischt! 🪣")
 
         elif f := request.FILES.get("file"):
-            new_banner = ImageSlide.objects.create(title=f"Neuer Banner  ({now()})")
+            new_banner = ImageSlide.objects.create(title=f"Neuer Banner  ({now().strftime('%d.%m.%y %H:%M:%S')})")
             new_banner.image.save(f.name, f)
             messages.success(request, "Neuer Banner erstellt.")
 

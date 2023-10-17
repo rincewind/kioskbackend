@@ -1,7 +1,7 @@
 {% extends "display/base.html" %}
 {% block content %}
 <h2 class="f2 lh-copy">Banner bearbeiten</h2>
-    <h3 class="f3 lh-copy">Aktuelles Bild:</h3>
+    <h3 class="f3 ">Aktuelles Bild:</h3>
     <style>
     .banneredit > div {
         padding-top: 0.35rem;
@@ -20,10 +20,18 @@
         line-height: 1.5; /* lh-copy */
 
     }
+    .errorlist {
+        list-style: none;
+        padding: 0.5rem 0 0.5rem 0;
+        background: #ffbaba;
+    }
+    .errorlist li {
+        padding: 0.2rem;
+    }
     </style>
 
-<div class="pa4">
-    <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="shadow-2">
+<div class="pa2">
+    <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="shadow-2 mw5">
 </div>
 
     <h3 class="f3 lh-copy">Daten bearbeiten:</h3>

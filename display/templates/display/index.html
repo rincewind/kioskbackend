@@ -1,6 +1,12 @@
 
+{% extends "display/base.html" %}
+{% block content %}
 
-<ul>
-    <li><a href="{% url "wartungsklappe" %}">Wartungsklappe öffnen</a></li>
-    <li><a href="{% url "slideshow" %}">Prachtvolles Display bewundern!</a></li>
+<ul class="list">
+    <li class="lh-copy pv2 ph0"><a class=""  href="{% url "wartungsklappe" %}">Wartungsklappe öffnen. Anmelden mit @froemern.org Google-Account. Nicht erschrecken. Sieht noch etwas wild aus.</a></li>
+    <li class="lh-copy pv2 ph0"><a class=""  href="{% url "slideshow" %}">Prachtvolles Display bewundern!</a></li>
+    <li class="lh-copy pv2 ph0"><a class=""  href="https://github.com/rincewind/kioskbackend/issues">Wünsche, Nöte, Kritik bitte hier abwerfen.</a></li>
+    <li class="lh-copy pv2 ph0"><a class="" href="https://github.com/rincewind/kioskbackend">Gabel mich beim GitHub! Falls jemand mitbasteln möchte.</a></li>
 </ul>
+
+{% endblock %}
