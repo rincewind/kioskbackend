@@ -17,6 +17,8 @@ django-allauth = "*"
 pillow = "*"
 whitenoise = "*"
 sorl-thumbnail = "*"
+requests = "*"
+beautifulsoup4 = "*"
 
 [dev-packages]
 

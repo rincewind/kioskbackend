@@ -90,6 +90,10 @@
                             <div style="width: 56%; display: flex; align-items: center; justify-content: space-around">
                                 {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 show_room=False %}
                             </div>
+                        {% elif slidetype == "kalender_raum"  %}
+                            <div style="width: 56%; display: flex; align-items: center; justify-content: space-around">
+                                {% include "display/snippet_eventlistslide.html" with events=slide.1 title=slide.0 show_room=True %}
+                            </div>
                         {% elif slidetype == "countdown" %}
                             <div style="flex-grow: 1;width: 56%">
                                                 <div>Noch </div>

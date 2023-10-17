@@ -1,13 +1,16 @@
 import collections
+import itertools
 import logging
 import re
 from datetime import timedelta, datetime
 
+import requests
 from allauth.socialaccount.models import SocialToken
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.core.mail import mail_admins
 from django.forms import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -26,6 +29,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+Event = collections.namedtuple("Event", "start summary allday jugend room")
 
 # Create your views here.
 
@@ -33,6 +37,58 @@ logger = logging.getLogger(__name__)
 
 def index(request):
     return render(request, "display/index.html")
+
+
+def start_of_day():
+    utcnow = datetime.utcnow()
+    return make_aware(datetime(utcnow.year, utcnow.month, utcnow.day), timezone.utc)
+
+def scrape_gottesdienste():
+
+    gottesdienste = []
+
+    r = requests.get('https://www.kirche-froemern.de/gruppen-angebote/gottesdienste')
+
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(r.text)
+
+    for t in soup.find_all("table", class_="contenttable"):
+        for row1, row2 in itertools.pairwise(t.find_all("tr")):
+            date, time = row1.find_all("td")
+            sonntag, beschreibung = row2.find_all("td")
+
+            monate = dict(Jan=1, Feb=2, Mar=3, Apr=4, Mai=5, Jun=6, Jul=7, Aug=8, Sep=9, Okt=10, Nov=11, Dez=12)
+            month = None
+            for monat, imonat in monate.items():
+                if monat in date.get_text():
+                    month = imonat
+
+            if month is None:
+                continue
+
+            day = int(re.sub(r"[^0-9]", "", date.get_text()))
+
+            if not ":" in time.get_text():
+                continue
+
+            hour,minute = time.get_text().split(":")
+
+            hour = int(hour)
+            minute = int(minute)
+
+            start = datetime.utcnow().replace(month=month, day=day, hour=hour, minute=minute, second=0,microsecond=0)
+            start = make_aware(start)
+
+            if start < start_of_day():
+                continue
+
+
+            gottesdienste.append(Event(start, beschreibung.get_text(), False, False, sonntag.get_text()))
+
+    return gottesdienste[:4]
+
+
+
 
 
 def massage_kalendereintrag(eintrag):
@@ -161,9 +217,7 @@ def kalender_dump(request):
 
                 token.save()
 
-            utcnow = datetime.utcnow()
-            start_of_day = datetime(utcnow.year, utcnow.month, utcnow.day)
-            googlenow = start_of_day.isoformat() + "Z"  # 'Z' indicates UTC time
+            googlenow = start_of_day().isoformat() + "Z"  # 'Z' indicates UTC time
 
             service = build("calendar", "v3", credentials=credentials)
             events_result = (
@@ -258,7 +312,6 @@ def show_presentation(request):
         if not events:
             continue
 
-        Event = collections.namedtuple("Event", "start summary allday jugend room")
 
         start_of_day = n.replace(hour=0, minute=0, second=0)
         end_of_day = n.replace(hour=23, minute=59, second=59)
@@ -278,7 +331,8 @@ def show_presentation(request):
 
             try:
                 summary, room = massage_kalendereintrag(summary)
-            except:
+            except Exception as e:
+                mail_admins("massage_kalendereintrag ist unglücklich", str(e))
                 logger.exception("massage_kalendereintrag ist unglücklich")
                 room = ""
 
@@ -325,7 +379,11 @@ def show_presentation(request):
 
     if special_event:
         slides.append(("countdown", special_event))
-
+    try:
+        slides.append(("kalender_raum", ("Gottesdienste", scrape_gottesdienste())))
+    except Exception as e:
+        mail_admins("scrape_gottesdienste() nicht so gut", str(e))
+        logger.exception("scrape_gottesdienste() nicht so gut")
 
     response = render(
         request,
