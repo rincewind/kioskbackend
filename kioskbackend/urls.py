@@ -27,6 +27,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", index, name="index"),
     path("display/", show_presentation, name="slideshow"),
+    path("display/<display>", show_presentation, name="slideshow_for_display"),
     path("wartungsklappe/", wartungsklappe, name="wartungsklappe"),
     path("wartungsklappe/banner/<int:pk>", banner_edit, name="banneredit"),
     path("kalenderdump/", kalender_dump, name="kalenderdump"),
