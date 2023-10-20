@@ -157,7 +157,7 @@
 				loop: true,
 				autoSlide: 11000,
 				progress: false,
-				autoSlideStoppable: true,
+				autoSlideStoppable: {% if show_controls %}true{% else %}false{% endif %},
                 width: 1600,
                 height: 900,
 

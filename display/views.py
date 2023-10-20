@@ -36,7 +36,7 @@ Event = collections.namedtuple("Event", "start summary allday jugend room")
 logger = logging.getLogger(__name__)
 
 def index(request):
-    return render(request, "display/index.html")
+    return render(request, "display/index.html", context=dict(displays=DisplayConfiguration.objects.all()))
 
 
 def start_of_day():
@@ -242,6 +242,8 @@ def kalender_dump(request):
 @xframe_options_sameorigin
 @cache_page(60 * 15)
 def show_presentation(request, display=""):
+    show_controls = not not request.GET.get("kontrolle") # should be UserAgent or something like that.
+
     try:
         cfg = DisplayConfiguration.objects.get(name=display)
     except DisplayConfiguration.DoesNotExist:
@@ -254,7 +256,7 @@ def show_presentation(request, display=""):
     start_of_day = n.replace(hour=0, minute=0, second=0)
     end_of_day = n.replace(hour=23, minute=59, second=59)
 
-    for item in cfg.items.filter(show_start__lt=n, show_end__gt=n):
+    for item in cfg.items.filter(show_start__lt=n, show_end__gt=n).order_by("position"):
         if item.typ == "banner":
             if item.banner.show_start < n and item.banner.show_end > n:
                 slides.append(("banner", item.banner))
@@ -357,6 +359,7 @@ def show_presentation(request, display=""):
             next_events=next_events,
             special_event=special_event,
             marker_event=current_event or next_event,
+            show_controls=show_controls,
         ),
     )
 
