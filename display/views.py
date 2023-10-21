@@ -250,6 +250,7 @@ def show_presentation(request, display=""):
         cfg = DisplayConfiguration.objects.order_by("name").first()
 
     slides = []
+    now_slide = None
     calendar_events = {} # cache calendar events
 
     n = now()
@@ -258,8 +259,12 @@ def show_presentation(request, display=""):
 
     for item in cfg.items.filter(show_start__lt=n, show_end__gt=n).order_by("position"):
         if item.typ == "banner":
-            if item.banner.show_start < n and item.banner.show_end > n:
+            if item.now_start is not None and item.now_start < n and item.now_start + item.how_long > n:
+                now_slide = item.banner
+
+            elif item.banner.show_start < n and item.banner.show_end > n:
                 slides.append(("banner", item.banner))
+
         elif item.typ == "gottesdienste":
             try:
                 slides.append(("kalender_raum", ("Gottesdienste", scrape_gottesdienste())))
@@ -360,6 +365,7 @@ def show_presentation(request, display=""):
             special_event=special_event,
             marker_event=current_event or next_event,
             show_controls=show_controls,
+            now_slide=now_slide,
         ),
     )
 

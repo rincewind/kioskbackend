@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from allauth.socialaccount.models import SocialToken
 from django.db import models
@@ -106,6 +106,9 @@ class DisplayConfigurationItem(models.Model):
     position = models.IntegerField(default=0)
     show_start = models.DateTimeField("Erste Anzeige", default=timezone.now, help_text="Ab wann soll dieser Banner angezeigt werden? (tt.mm.jjjj hh:mm)")
     show_end = models.DateTimeField("Letzte Anzeige", default=datetime(3000, 1, 1, 9, 42), help_text="Ab wann soll dieser Banner nicht mehr angezeigt werden? (tt.mm.jjjj hh:mm)")
+
+    now_start = models.DateTimeField("Als 'Jetzt' anzeigen", default=None, blank=True, null=True)
+    how_long = models.DurationField("Wie lange als 'Jetzt' anzeigen?", default=timedelta(hours=2), blank=False, null=False)
 
     display = models.ForeignKey(DisplayConfiguration, on_delete=models.CASCADE, related_name="items")
 

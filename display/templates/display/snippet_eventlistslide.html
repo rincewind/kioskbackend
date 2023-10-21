@@ -1,6 +1,6 @@
 {% if events %}
 <div class="eventlist {{ extra_class }}">
-    <h4 class="eventlist__title" style="padding-left: 0.5em;">{{ title}}</h4>
+    <h4 class="eventlist__title" style="padding-left: 0.5em;">{{ title }}</h4>
     <table class="eventlist__table" data-id="table-{{ title }}">
     {% regroup events by start.day as events_by_day %}
     {%  for day, groupevents in events_by_day %}
