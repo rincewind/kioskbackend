@@ -241,9 +241,9 @@ def kalender_dump(request):
 
 @xframe_options_sameorigin
 @cache_page(60 * 15)
-def show_presentation(request, display=""):
+def show_presentation(request, display="", portrait=""):
     show_controls = not not request.GET.get("kontrolle") # should be UserAgent or something like that.
-
+    portrait = not not portrait
     try:
         cfg = DisplayConfiguration.objects.get(name=display)
     except DisplayConfiguration.DoesNotExist:
@@ -252,6 +252,12 @@ def show_presentation(request, display=""):
     slides = []
     now_slide = None
     calendar_events = {} # cache calendar events
+    today_events = []
+    next_event = None
+    current_event = None
+    next_events = []
+    preview_events = []
+    special_event=None
 
     n = now()
     start_of_day = n.replace(hour=0, minute=0, second=0)

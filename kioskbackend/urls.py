@@ -28,6 +28,7 @@ urlpatterns = [
     path("", index, name="index"),
     path("display/", show_presentation, name="slideshow"),
     path("display/<display>", show_presentation, name="slideshow_for_display"),
+    path("display/<display>/p", show_presentation, name="slideshow_for_display_portrait"),
     path("wartungsklappe/", wartungsklappe, name="wartungsklappe"),
     path("wartungsklappe/banner/<int:pk>", banner_edit, name="banneredit"),
     path("kalenderdump/", kalender_dump, name="kalenderdump"),
