@@ -20,7 +20,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.views.static import serve
 
-from display.views import show_presentation, wartungsklappe, banner_edit, index, kalender_dump
+from display.views import show_presentation, wartungsklappe, banner_edit, index, kalender_dump, display_status
 
 urlpatterns = [
     path("accounts/", include("allauth.urls")),
@@ -28,7 +28,8 @@ urlpatterns = [
     path("", index, name="index"),
     path("display/", show_presentation, name="slideshow"),
     path("display/<display>", show_presentation, name="slideshow_for_display"),
-    path("display/<display>/p", show_presentation, name="slideshow_for_display_portrait"),
+    path("status/<display>", display_status, name="display_active"),
+    path("display/<display>/<portrait>", show_presentation, name="slideshow_for_display_portrait"),
     path("wartungsklappe/", wartungsklappe, name="wartungsklappe"),
     path("wartungsklappe/banner/<int:pk>", banner_edit, name="banneredit"),
     path("kalenderdump/", kalender_dump, name="kalenderdump"),

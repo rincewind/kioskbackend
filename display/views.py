@@ -29,7 +29,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-Event = collections.namedtuple("Event", "start summary allday jugend room")
+Event = collections.namedtuple("Event", "start end summary allday jugend room")
 
 # Create your views here.
 
@@ -83,7 +83,7 @@ def scrape_gottesdienste():
                 continue
 
 
-            gottesdienste.append(Event(start, beschreibung.get_text(), False, False, sonntag.get_text()))
+            gottesdienste.append(Event(start, start + timedelta(hours=1), beschreibung.get_text(), False, False, sonntag.get_text()))
 
     return gottesdienste[:4]
 
@@ -239,6 +239,88 @@ def kalender_dump(request):
 
     return HttpResponse(data, content_type="text/plain")
 
+
+def load_events(calcfg):
+    n = now()
+    start_of_day = n.replace(hour=0, minute=0, second=0)
+    end_of_day = n.replace(hour=23, minute=59, second=59)
+
+    today_events = []  # was geht heute so? (Auch Vergangenes)
+    next_event = None  # nächstes Ereignis das in der nächsten Stunde startet.
+    current_event = (
+        None  # letztes Ereignis, wenn es  in der letzten Stunde startete.
+    )
+    next_events = []  # die nächsten fünf Events
+    preview_events = []  # speziell markierte vorschau events
+    special_event = None
+    events = calcfg.load_events()
+
+    for event in events:
+        start = event["start"].get("dateTime", event["start"].get("date"))
+        end = event["end"].get("dateTime", event["end"].get("date"))
+
+        allday = not "dateTime" in event["start"]
+        summary = event.get("summary", "")
+
+        is_preview_event = "⏰" in summary
+        is_sepecial_event = "🎉" in summary
+        is_jugend = "🚸" in summary
+
+        summary = summary.replace("⏰", "").replace("🎉", "").replace("🚸", "")
+
+        try:
+            summary, room = massage_kalendereintrag(summary)
+        except Exception as e:
+            mail_admins("massage_kalendereintrag ist unglücklich", str(e))
+            logger.exception("massage_kalendereintrag ist unglücklich")
+            room = ""
+
+        is_jugend = is_jugend or room == "Jugendräume"  # temporary special case?!
+
+        start = datetime.fromisoformat(start)
+        end = datetime.fromisoformat(end)
+
+        if not is_aware(start):
+            start = make_aware(start, timezone.utc)
+
+        if not is_aware(end):
+            end = make_aware(end, timezone.utc)
+
+        data = Event(start, end, summary, allday, is_jugend, room)
+
+        if start_of_day <= start <= end_of_day:
+            today_events.append(data)
+
+        if start - timedelta(hours=1) <= n <= start:  # event start within the hour
+            next_event = data
+
+        elif (
+                start <= n <= start + timedelta(hours=1)
+        ):  # event did start in the last hour
+            current_event = data
+
+        if end_of_day <= start <= n + timedelta(days=30):
+            if len(next_events) < 6 or next_events[-1].start.day == data.start.day:
+                # inlcude max 6 events but always finish the day
+                next_events.append(data)
+
+        if (
+                is_preview_event
+                and data not in today_events
+                and data not in next_events
+        ):
+            preview_events.append(data)
+
+        if is_sepecial_event and not special_event:
+            special_event = data
+
+    return (today_events, next_event, current_event, next_events, preview_events, special_event)
+
+
+def iter_items(cfg):
+    n = now()
+    return cfg.items.filter(show_start__lt=n, show_end__gt=n).order_by("position")
+
 @xframe_options_sameorigin
 @cache_page(60 * 15)
 def show_presentation(request, display="", portrait=""):
@@ -260,10 +342,8 @@ def show_presentation(request, display="", portrait=""):
     special_event=None
 
     n = now()
-    start_of_day = n.replace(hour=0, minute=0, second=0)
-    end_of_day = n.replace(hour=23, minute=59, second=59)
 
-    for item in cfg.items.filter(show_start__lt=n, show_end__gt=n).order_by("position"):
+    for item in iter_items(cfg):
         if item.typ == "banner":
             if item.now_start is not None and item.now_start < n and item.now_start + item.how_long > n:
                 now_slide = item.banner
@@ -282,71 +362,7 @@ def show_presentation(request, display="", portrait=""):
             if item.calendar.pk in calendar_events:
                 today_events, next_event, current_event, next_events, preview_events, special_event = calendar_events[item.calendar.pk]
             else:
-                today_events = []  # was geht heute so? (Auch Vergangenes)
-                next_event = None  # nächstes Ereignis das in der nächsten Stunde startet.
-                current_event = (
-                    None  # letztes Ereignis, wenn es  in der letzten Stunde startete.
-                )
-                next_events = []  # die nächsten fünf Events
-                preview_events = []  # speziell markierte vorschau events
-                special_event = None
-                calcfg = item.calendar
-                events = calcfg.load_events()
-
-                for event in events:
-                    start = event["start"].get("dateTime", event["start"].get("date"))
-                    allday = not "dateTime" in event["start"]
-                    summary = event.get("summary", "")
-
-
-                    is_preview_event = "⏰" in summary
-                    is_sepecial_event = "🎉" in summary
-                    is_jugend = "🚸" in summary
-
-                    summary = summary.replace("⏰", "").replace("🎉", "").replace("🚸", "")
-
-                    try:
-                        summary, room = massage_kalendereintrag(summary)
-                    except Exception as e:
-                        mail_admins("massage_kalendereintrag ist unglücklich", str(e))
-                        logger.exception("massage_kalendereintrag ist unglücklich")
-                        room = ""
-
-                    is_jugend = is_jugend or room == "Jugendräume" # temporary special case?!
-
-                    start = datetime.fromisoformat(start)
-                    if not is_aware(start):
-                        start = make_aware(start, timezone.utc)
-
-                    data = Event(start, summary, allday, is_jugend, room)
-
-                    if start_of_day <= start <= end_of_day:
-                        today_events.append(data)
-
-                    if start - timedelta(hours=1) <= n <= start:  # event start within the hour
-                        next_event = data
-
-                    elif (
-                        start <= n <= start + timedelta(hours=1)
-                    ):  # event did start in the last hour
-                        current_event = data
-
-                    if end_of_day <= start <= n + timedelta(days=30):
-                        if len(next_events) < 6 or next_events[-1].start.day == data.start.day:
-                            # inlcude max 6 events but always finish the day
-                            next_events.append(data)
-
-                    if (
-                        is_preview_event
-                        and data not in today_events
-                        and data not in next_events
-                    ):
-                        preview_events.append(data)
-
-                    if is_sepecial_event and not special_event:
-                        special_event = data
-
-
+                today_events, next_event, current_event, next_events, preview_events, special_event = load_events(item.calendar)
                 calendar_events[item.calendar.pk] = (today_events, next_event, current_event, next_events, preview_events, special_event)
 
 
@@ -372,6 +388,7 @@ def show_presentation(request, display="", portrait=""):
             marker_event=current_event or next_event,
             show_controls=show_controls,
             now_slide=now_slide,
+            portrait=portrait,
         ),
     )
 
@@ -522,3 +539,28 @@ def wartungsklappe(request):
             banner=banner,
         ),
     )
+
+
+def display_status(request, display):
+    cfg = get_object_or_404(DisplayConfiguration, name=display)
+
+    for item in iter_items(cfg):
+        if item.calendar:
+            today_events = load_events(item.calendar)[0]
+            n = now()
+            active = False
+            for event in today_events:
+                active |= n - timedelta(hours=1) <= event.start <= n + timedelta(hours=1)
+                active |= event.start <= n <= event.end
+                active |= n <= event.end <= n + timedelta(hours=1)
+                if active:
+                    break
+
+            if active:
+                break
+
+    if active:
+        return HttpResponse("ON", status=200)
+
+    else:
+        return HttpResponse("OFF", status=204)
