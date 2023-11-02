@@ -8,7 +8,9 @@
         Prachvolle Displays bewundern:
         <ul>
             {% for display in displays %}
-                <li class="lh-copy pv2 ph0"><a class=""  href="{% url "slideshow_for_display" display.name%}?kontrolle=istbesser">{{ display.name}} ({{ display.title }})</a></li>
+                <li class="lh-copy pv2 ph0"><a class=""  href="{% url "slideshow_for_display" display.name%}?kontrolle=istbesser">{{ display.name}} ({{ display.title }})</a>
+                (<a href="{% url "display_active" display.name %}?vorschau=ja">An oder Aus?</a>)
+                </li>
             {% endfor %}
         </ul>
     </li>

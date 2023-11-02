@@ -552,23 +552,45 @@ def wartungsklappe(request):
 
 def display_status(request, display):
     cfg = get_object_or_404(DisplayConfiguration, name=display)
+    preview = request.GET.get("vorschau")
+    data = {}
+    ns = [now()]
+
+    if preview:
+        for step in range(48):
+            ns.append(ns[-1] + timedelta(minutes=30))
+
 
     for item in iter_items(cfg):
         if item.calendar:
             today_events = load_events(item.calendar)[0]
-            n = now()
-            active = False
-            for event in today_events:
-                active |= n - timedelta(hours=1) <= event.start <= n + timedelta(hours=1)
-                active |= event.start <= n <= event.end
-                active |= n <= event.end <= n + timedelta(hours=1)
-                if active:
-                    break
-
-            if active:
+            if not today_events:
                 break
 
-    if active:
+            for n in ns:
+                active = data.get(n, False)
+                if active:
+                    continue
+
+                for event in today_events:
+                    active |= n - timedelta(hours=1) <= event.start <= n + timedelta(hours=1)
+                    active |= event.start <= n <= event.end
+                    active |= n <= event.end <= n + timedelta(hours=1)
+                    if active:
+                        break
+
+                data[n] = active
+
+                if active and not preview:
+                    break
+
+    if len(data) > 1:
+        return render(
+            request,
+            "display/onoff.html",
+            context=dict(rows=data.items()))
+
+    if data and list(data.values())[0]:
         return HttpResponse("ON", status=200)
 
     else:
