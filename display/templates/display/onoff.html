@@ -4,6 +4,7 @@
 {% block content %}
 
 <h1 class="f1 lh-title">An oder Aus?</h1>
+    <h2 class="h2 lh-title">Heute, {% now 'DATE_FORMAT' %}.</h2>
     <table>
     {% for time, ison in rows %}
     <tr>
