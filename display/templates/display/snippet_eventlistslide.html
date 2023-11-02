@@ -6,7 +6,15 @@
     {%  for day, groupevents in events_by_day %}
         <tr class="eventlist__row eventlist__row--group"><td class="eventlist__group" colspan="2">{{ groupevents.0.start|date:"l, d. F" }}</td></tr>
         {% for event in groupevents %}
-        <tr class="eventlist__row {% if event == marker_event %}eventlist__row--marked{% endif %}"><td class="eventlist__time">{{ event.start|date:"H:i" }}</td>
+        <tr class="eventlist__row {% if event == marker_event %}eventlist__row--marked{% endif %}"><td class="eventlist__time">
+            <div class="flexcol">
+            <span class="starttime">{{ event.start|date:"H:i" }}</span>
+                {%if event.start != event.end and not event.allday %}
+            <span class="bis">bis</span>
+            <span class="endtime">{{ event.end|date:"H:i" }}</span>
+                {% endif %}
+                </div>
+        </td>
         <td class="eventlist__summary {% if event.jugend %}hv{% endif %}">
         {% if event.room and show_room %}<span class="eventlist__room">{{ event.room }}</span>{% endif %}
             {{ event.summary }}
