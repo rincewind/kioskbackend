@@ -550,6 +550,22 @@ def wartungsklappe(request):
     )
 
 
+def should_be_always_on(n):
+    """
+    this needs a way to configure always on time (like crontab entries, for stull like every Wednesday vom 9-5
+    FIXME: this is a temporary solution with the gemeindebüro zeiten
+    """
+    if n.isoweekday() in (2,4): # tuesdays and thursdaus
+        if 8 <= n.hour <= 12: # 10-12 CET in UTC plus one hour in each direction
+            return True
+
+    if n.isoweekday() == 3: # wednesdays
+        if 13 <= n.hour <= 17: # 15-17 CET in UTC plus one hour in each direction
+            return True
+
+    return False
+
+
 def display_status(request, display):
     cfg = get_object_or_404(DisplayConfiguration, name=display)
     preview = request.GET.get("vorschau")
@@ -557,6 +573,7 @@ def display_status(request, display):
     ns = [now().replace(minute=0, second=30)]
 
     if preview:
+        ns = [now().replace(hour=2, minute=0, second=30)]
         for step in range(48):
             ns.append(ns[-1] + timedelta(minutes=30))
             if ns[-1].day != ns[0].day:
@@ -574,6 +591,8 @@ def display_status(request, display):
                 active = data.get(n, False)
                 if active:
                     continue
+
+                active |= should_be_always_on(n)
 
                 for event in today_events:
                     active |= n - timedelta(hours=1) <= event.start <= n + timedelta(hours=1)
