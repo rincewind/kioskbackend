@@ -574,8 +574,7 @@ def display_status(request, display):
 
                 for event in today_events:
                     active |= n - timedelta(hours=1) <= event.start <= n + timedelta(hours=1)
-                    active |= event.start <= n <= event.end
-                    active |= n <= event.end <= n + timedelta(hours=1)
+                    active |= event.start <= n <= event.end + timedelta(hours=1)
                     if active:
                         break
 
