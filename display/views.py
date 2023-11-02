@@ -554,11 +554,14 @@ def display_status(request, display):
     cfg = get_object_or_404(DisplayConfiguration, name=display)
     preview = request.GET.get("vorschau")
     data = {}
-    ns = [now()]
+    ns = [now().replace(minute=0, second=30)]
 
     if preview:
         for step in range(48):
             ns.append(ns[-1] + timedelta(minutes=30))
+            if ns[-1].day != ns[0].day:
+                ns.pop()
+                break
 
 
     for item in iter_items(cfg):

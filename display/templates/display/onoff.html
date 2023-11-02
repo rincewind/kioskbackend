@@ -4,11 +4,10 @@
 {% block content %}
 
 <h1 class="f1 lh-title">An oder Aus?</h1>
-
     <table>
     {% for time, ison in rows %}
     <tr>
-        <th>{{ time|date:"H:i" }}</th>
+        <th>{{ time|date:"H:i" }} Uhr</th>
         {% if ison %}<td class="green">AN</td>{% else %}<td class="red">AUS</td>{% endif %}
     </tr>
     {% endfor %}
