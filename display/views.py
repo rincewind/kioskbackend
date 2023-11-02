@@ -83,7 +83,7 @@ def scrape_gottesdienste():
                 continue
 
 
-            gottesdienste.append(Event(start, start + timedelta(hours=1), beschreibung.get_text(), False, False, sonntag.get_text()))
+            gottesdienste.append(Event(start, start, beschreibung.get_text(), False, False, sonntag.get_text()))
 
     return gottesdienste[:4]
 
