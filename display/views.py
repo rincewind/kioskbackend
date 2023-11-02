@@ -11,7 +11,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import mail_admins
-from django.forms import ModelForm, SplitDateTimeWidget, SplitDateTimeField, DateTimeInput, DateTimeField
+from django.forms import ModelForm, SplitDateTimeWidget, SplitDateTimeField, DateTimeInput, DateTimeField, \
+    ModelMultipleChoiceField, CheckboxSelectMultiple
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -422,6 +423,10 @@ class BannerForm(ModelForm):
         model = ImageSlide
         fields = ["image", "title", "show_start", "show_end"]
 
+
+    displays = ModelMultipleChoiceField(required=False, widget=CheckboxSelectMultiple(), queryset=DisplayConfiguration.objects.all())
+
+
 @staff_member_required
 def banner_edit(request, pk):
     banner = get_object_or_404(ImageSlide, pk=pk)
@@ -430,12 +435,8 @@ def banner_edit(request, pk):
         form = BannerForm(request.POST, request.FILES, instance=banner)
         if form.is_valid():
             form.save()
-            for cfg in DisplayConfiguration.objects.all():
-                for item in cfg.items.all():
-                    if item.typ == "banner" and item.banner.pk == banner.pk:
-                        break
-                else:
-                    cfg.items.create(typ="banner", banner=banner)
+            displays = form.cleaned_data["displays"]
+            # FIXME: do something with displays here
 
             return redirect("wartungsklappe")
 
@@ -502,7 +503,15 @@ def wartungsklappe(request):
         elif f := request.FILES.get("file"):
             new_banner = ImageSlide.objects.create(title=f"Neuer Banner  ({now().strftime('%d.%m.%y %H:%M:%S')})")
             new_banner.image.save(f.name, f)
-            messages.success(request, "Neuer Banner erstellt.")
+
+            for cfg in DisplayConfiguration.objects.all():
+                for item in cfg.items.all():
+                    if item.typ == "banner" and item.banner.pk == new_banner.pk:
+                        break
+                else:
+                    cfg.items.create(typ="banner", banner=new_banner)
+
+            messages.success(request, "Neuer Banner erstellt und auf allen Displays aktiviert.")
 
         elif "connect" in request.POST:
             calid = request.POST.get("connect_calendar")
