@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
+from django.views.decorators.cache import cache_control
 from django.views.static import serve
 
 from display.views import show_presentation, wartungsklappe, banner_edit, index, kalender_dump, display_status
@@ -35,5 +36,5 @@ urlpatterns = [
     path("kalenderdump/", kalender_dump, name="kalenderdump"),
     # DANGER Wil Robinson. This is not recommended. Don't do this unless you know why you should'nt.
     # use whitenoise also for media. in this case it's fine
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^media/(?P<path>.*)$', cache_control(max_age=604800)(serve), {'document_root': settings.MEDIA_ROOT}),
 ] #+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
