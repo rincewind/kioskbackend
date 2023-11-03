@@ -13,6 +13,8 @@
 		<link rel="stylesheet" href="{%  static 'black.css' %}">
 		<link rel="stylesheet" href="{%  static 'fonts/handvetica/font.css' %}">
 
+
+
         <style>
             #gemeindehaus .tabelle td, .tabelle tr {
                 border: none;
@@ -54,7 +56,7 @@
                 font-size: 0.7em;
             }
             .eventlist .endtime {
-                font-size: 0.7em;
+                font-size: 0.6em;
             }
             .eventlist .eventlist__row--marked {
                 background: darkslateblue;
@@ -78,12 +80,51 @@
                 font-size: 0.85em;
                 color: rgba(255,255,255,0.7);
             }
+            @keyframes cursor-blink {
+              0% {
+                opacity: 0;
+              }
+            }
+
+            .separator {
+                animation: cursor-blink 1.5s steps(2) infinite;
+            }
+            .clock {
+                position: absolute;
+                top: 0; right: 0;
+                color: orangered;
+                font-family: monospace;
+                padding: 2rem;
+            }
+            .reveal .welcome {
+                width: 100%;
+                text-align: center;
+
+                text-transform: none;
+                font-size: 1em;
+            }
         </style>
 
 		<!-- Theme used for syntax highlighted code -->
 	</head>
 	<body>
 		<div class="reveal" id="gemeindehaus">
+                            <div data-id="clock" class="clock"><span class="hours">9</span><span class="separator">:</span><span class="minutes">42</span></div>
+        <script>
+            function update_time(){
+                var hourEs = document.querySelectorAll(".hours");
+                var minuteEs = document.querySelectorAll(".minutes")
+                var d = new Date();
+                var m = d.getMinutes();
+                var h = d.getHours();
+                console.log("it is time!")
+                hourEs.forEach(function (e) { e.innerText = "" + h;})
+                minuteEs.forEach(function (e) {e.innerText = "" + m;})
+            }
+
+            setInterval(update_time, 30000);
+            update_time();
+        </script>
 			<div class="slides">
             {% comment %}
                 {% for slide in slides %}
@@ -123,9 +164,10 @@
                                 <h4 data-id="now-slide-title" class="" style=" text-align: center; width:100%; margin-top: 2rem;">Jetzt</h4>
                                 <div data-id="now-slide" style="background-size: contain; background-image: url({{ now_slide.image.url }}); background-position: center center; background-size: contain; background-repeat: no-repeat; width: 100%; height: 80%;">&nbsp;</div>
                         {% else %}
+
                             <div data-id="today-events">
                                 {% if today_events %}
-                                {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  extra_class="eventlist--large" marker_event=marker_event show_room=True%}
+                                {% include "display/snippet_eventlistslide.html" with events=today_events title="Heute"  show_bis=True extra_class="eventlist--large" marker_event=marker_event show_room=True%}
                                 {% else %}
                                 {% include "display/snippet_eventlistslide.html" with events=next_events title=""  extra_class="" marker_event=None%}
                                 {% endif %}

@@ -9,9 +9,9 @@
         <tr class="eventlist__row {% if event == marker_event %}eventlist__row--marked{% endif %}"><td class="eventlist__time">
             <div class="flexcol">
             <span class="starttime">{{ event.start|date:"H:i" }}</span>
-                {%if event.start != event.end and not event.allday %}
-            <span class="bis">bis</span>
-            <span class="endtime">{{ event.end|date:"H:i" }}</span>
+                {%if event.start != event.end and not event.allday and show_bis %}
+            <span class="bis"></span>
+            <span class="endtime">&ndash;&nbsp;{{ event.end|date:"H:i" }}</span>
                 {% endif %}
                 </div>
         </td>
