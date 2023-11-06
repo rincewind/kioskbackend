@@ -264,10 +264,21 @@ def load_events(calcfg):
         summary = event.get("summary", "")
 
         is_preview_event = "⏰" in summary
-        is_sepecial_event = "🎉" in summary
+        is_special_event = "🎉" in summary
         is_jugend = "🚸" in summary
+        is_hidden = "👻" in summary
+
+        is_preview_event |= "[pre]" in summary
+        is_special_event |= "[codo]" in summary
+        is_jugend |= "[evj]" in summary
+        is_hidden |= "[intern]" in summary
 
         summary = summary.replace("⏰", "").replace("🎉", "").replace("🚸", "")
+        summary = summary.replace("[pre]", "").replace("[codo]", "").replace("[evj]", "").replace("[intern]", "")
+
+        if is_hidden:
+            continue
+
 
         try:
             summary, room = massage_kalendereintrag(summary)
@@ -312,7 +323,7 @@ def load_events(calcfg):
         ):
             preview_events.append(data)
 
-        if is_sepecial_event and not special_event:
+        if is_special_event and not special_event:
             special_event = data
 
     return (today_events, next_event, current_event, next_events, preview_events, special_event)
