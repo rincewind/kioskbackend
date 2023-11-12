@@ -605,7 +605,21 @@ def display_status(request, display):
 
 
     for item in iter_items(cfg):
-        if item.calendar:
+        if item.typ == "banner" and item.now_start:
+            for n in ns:
+                active = data.get(n, False)
+                if active:
+                    continue
+
+                active |= item.now_start - timedelta(hours=1) <= n <= item.now_start + item.how_long + timedelta(hours=1)
+
+                data[n] = active
+
+                if active and not preview:
+                    break
+
+
+        elif item.calendar:
             today_events = load_events(item.calendar)[0]
             if not today_events:
                 break
@@ -628,7 +642,7 @@ def display_status(request, display):
                 if active and not preview:
                     break
 
-    if len(data) > 1:
+    if len(data) > 1 or preview:
         return render(
             request,
             "display/onoff.html",
