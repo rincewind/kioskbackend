@@ -388,7 +388,7 @@ def show_presentation(request, display="", portrait=""):
                 calendar_events[item.calendar.pk] = (today_events, next_event, current_event, next_events, preview_events, special_event)
 
 
-            if today_events and next_events and item.typ=="next_events" and not now_slide:
+            if (today_events or now_slide) and next_events and item.typ=="next_events":
                 slides.append(("kalender", ("Die nächsten Veranstaltungen", next_events)))
 
             if preview_events and item.typ=="preview_events":
