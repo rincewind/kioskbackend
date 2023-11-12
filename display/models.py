@@ -96,6 +96,9 @@ class DisplayConfiguration(models.Model):
     name = models.CharField(max_length=255, blank=False, unique=True)
     title = models.CharField(max_length=1024, blank=True, default="")
 
+    show_clock = models.BooleanField(default=True)
+    two_column = models.BooleanField(default=True)
+
     def __str__(self):
         return f"Display {self.name} ({self.title})"
 

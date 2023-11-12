@@ -401,6 +401,8 @@ def show_presentation(request, display="", portrait=""):
             show_controls=show_controls,
             now_slide=now_slide,
             portrait=portrait,
+            two_column=cfg.two_column,
+            show_clock=cfg.show_clock,
         ),
     )
 
