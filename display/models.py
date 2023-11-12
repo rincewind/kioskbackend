@@ -93,11 +93,17 @@ class CalendarConnection(models.Model):
 
 
 class DisplayConfiguration(models.Model):
+    EFFECTS = (("", "Kein Effekt"),
+               ("plasma_of_love", "Plasma of Love by Kevin Roast"),
+               ("emoji_rain", "Emoji-Matrix"))
+
     name = models.CharField(max_length=255, blank=False, unique=True)
     title = models.CharField(max_length=1024, blank=True, default="")
 
     show_clock = models.BooleanField(default=True)
     two_column = models.BooleanField(default=True)
+
+    effect = models.CharField(choices=EFFECTS, default="", blank=True, max_length=1024)
 
     def __str__(self):
         return f"Display {self.name} ({self.title})"

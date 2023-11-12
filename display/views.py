@@ -343,6 +343,16 @@ def show_presentation(request, display="", portrait=""):
     except DisplayConfiguration.DoesNotExist:
         cfg = DisplayConfiguration.objects.order_by("name").first()
 
+    if cfg.effect:
+        response = render(
+            request,
+            f"display/{cfg.effect}.html",
+            context=dict(portrait=portrait))
+
+        response.headers["Refresh"] = "300"
+        return response
+
+
     slides = []
     now_slide = None
     calendar_events = {} # cache calendar events
