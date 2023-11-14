@@ -86,6 +86,8 @@ def scrape_gottesdienste():
 
             gottesdienste.append(Event(start, start, beschreibung.get_text(), False, False, sonntag.get_text()))
 
+        break # only use first contenttable
+
     return gottesdienste[:4]
 
 
