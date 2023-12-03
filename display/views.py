@@ -1,9 +1,10 @@
 import collections
 import itertools
+import locale
 import logging
 import re
 from datetime import timedelta, datetime
-
+import time
 import requests
 from allauth.socialaccount.models import SocialToken
 from django.contrib import messages
@@ -45,6 +46,7 @@ def start_of_day():
     return make_aware(datetime(utcnow.year, utcnow.month, utcnow.day), timezone.utc)
 
 def scrape_gottesdienste():
+    locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
 
     gottesdienste = []
 
@@ -54,41 +56,85 @@ def scrape_gottesdienste():
     soup = BeautifulSoup(r.text)
 
     for t in soup.find_all("table", class_="contenttable"):
-        for row1, row2 in itertools.pairwise(t.find_all("tr")):
-            date, time = row1.find_all("td")
-            sonntag, beschreibung = row2.find_all("td")
 
-            monate = dict(Jan=1, Feb=2, Mar=3, Apr=4, Mai=5, Jun=6, Jul=7, Aug=8, Sep=9, Okt=10, Nov=11, Dez=12)
-            month = None
-            for monat, imonat in monate.items():
-                if monat in date.get_text():
-                    month = imonat
+        first_row = t.find("tr")
+        if len(first_row.find_all("td")) == 4: # multi table
+            orte = []
+            for row in t.find_all("tr"):
+                if len(row.find_all("td")) < 4:
+                    continue
 
-            if month is None:
-                continue
+                if not orte:
+                    orte.append("")
+                    for col in row.find_all("td"):
+                        t = col.get_text().strip()
+                        if t:
+                            orte.append(t.strip())
 
-            day = int(re.sub(r"[^0-9]", "", date.get_text()))
+                    continue
 
-            if not ":" in time.get_text():
-                continue
+                day = None
+                untertitel = ""
+                for ort, col in zip(orte, row.find_all("td")):
 
-            hour,minute = time.get_text().split(":")
+                    try:
+                        if not ort:
+                            p_elements = col.find_all("p")
+                            datum = p_elements[0].get_text().strip()
+                            untertitel = " ".join(e.get_text().strip() for e in p_elements[1:])
+                            day = time.strptime(datum, "%d. %B")
 
-            hour = int(hour)
-            minute = int(minute)
+                        else:
+                            p_elements = col.find_all("p")
+                            uhrzeit = p_elements[0].get_text().strip()
+                            titel = " ".join(e.get_text().strip() for e in p_elements[1:])
+                            uhrzeit = time.strptime(uhrzeit, "%H:%M")
+                            date = datetime.utcnow().replace(day=day.tm_mday, month=day.tm_mon, hour=uhrzeit.tm_hour, minute=uhrzeit.tm_min, second=0)
+                            make_aware(date)
+                            gottesdienste.append(Event(date, date, titel, False, False, f"{ort} ({untertitel})"))
 
-            start = datetime.utcnow().replace(month=month, day=day, hour=hour, minute=minute, second=0,microsecond=0)
-            start = make_aware(start)
-
-            if start < start_of_day():
-                continue
 
 
-            gottesdienste.append(Event(start, start, beschreibung.get_text(), False, False, sonntag.get_text()))
+                    except ValueError:
+                        continue # skip if broken
 
-        break # only use first contenttable
 
-    return gottesdienste[:4]
+        else:
+
+            for row1, row2 in itertools.pairwise(t.find_all("tr")):
+                date, thetime = row1.find_all("td")
+                sonntag, beschreibung = row2.find_all("td")
+
+                monate = dict(Jan=1, Feb=2, Mar=3, Apr=4, Mai=5, Jun=6, Jul=7, Aug=8, Sep=9, Okt=10, Nov=11, Dez=12)
+                month = None
+                for monat, imonat in monate.items():
+                    if monat in date.get_text():
+                        month = imonat
+
+                if month is None:
+                    continue
+
+                day = int(re.sub(r"[^0-9]", "", date.get_text()))
+
+                if not ":" in thetime.get_text():
+                    continue
+
+                hour,minute = thetime.get_text().split(":")
+
+                hour = int(hour)
+                minute = int(minute)
+
+                start = datetime.utcnow().replace(month=month, day=day, hour=hour, minute=minute, second=0,microsecond=0)
+                start = make_aware(start)
+
+                if start < start_of_day():
+                    continue
+
+
+                gottesdienste.append(Event(start, start, beschreibung.get_text(), False, False, sonntag.get_text()))
+
+
+    return gottesdienste[:8]
 
 
 
@@ -379,6 +425,8 @@ def show_presentation(request, display="", portrait=""):
             try:
                 slides.append(("kalender_raum", ("Gottesdienste", scrape_gottesdienste())))
             except Exception as e:
+                if settings.DEBUG:
+                    raise
                 mail_admins("scrape_gottesdienste() nicht so gut", str(e))
                 logger.exception("scrape_gottesdienste() nicht so gut")
 
