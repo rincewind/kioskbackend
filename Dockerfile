@@ -6,6 +6,11 @@ RUN apt-get update && \
     apt-get install -y && \
     pip3 install uwsgi && \
     pip3 install pipenv
+    
+RUN apt-get install locales
+RUN sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/g' /etc/locale.gen    
+RUN locale-gen
+ENV LANG="de_DE.UTF-8" LC_ALL="de_DE.UTF-8"
 
 
 RUN mkdir -p /data
